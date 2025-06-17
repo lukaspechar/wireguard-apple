@@ -27,11 +27,11 @@ extension FileManager {
         return sharedFolderURL
     }
 
-    static var logFileURL: URL? {
+    public static var logFileURL: URL? {
         return sharedFolderURL?.appendingPathComponent("tunnel-log.bin")
     }
 
-    static var networkExtensionLastErrorFileURL: URL? {
+    public static var networkExtensionLastErrorFileURL: URL? {
         return sharedFolderURL?.appendingPathComponent("last-error.txt")
     }
 
@@ -39,7 +39,7 @@ extension FileManager {
         return sharedFolderURL?.appendingPathComponent("login-helper-timestamp.bin")
     }
 
-    static func deleteFile(at url: URL) -> Bool {
+    public static func deleteFile(at url: URL) -> Bool {
         do {
             try FileManager.default.removeItem(at: url)
         } catch {

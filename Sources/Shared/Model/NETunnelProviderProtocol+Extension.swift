@@ -2,8 +2,9 @@
 // Copyright © 2018-2023 WireGuard LLC. All Rights Reserved.
 
 import NetworkExtension
+import WireGuardKit
 
-enum PacketTunnelProviderError: String, Error {
+public enum PacketTunnelProviderError: String, Error {
     case savedProtocolConfigurationIsInvalid
     case dnsResolutionFailure
     case couldNotStartBackend
@@ -36,7 +37,7 @@ extension NETunnelProviderProtocol {
         }
     }
 
-    func asTunnelConfiguration(called name: String? = nil) -> TunnelConfiguration? {
+    public func asTunnelConfiguration(called name: String? = nil) -> TunnelConfiguration? {
         if let passwordReference = passwordReference,
             let config = Keychain.openReference(called: passwordReference) {
             return try? TunnelConfiguration(fromWgQuickConfig: config, called: name)

@@ -2,6 +2,7 @@
 // Copyright © 2018-2023 WireGuard LLC. All Rights Reserved.
 
 import Foundation
+import WireGuardKit
 
 public final class TunnelConfiguration {
     public var name: String?
