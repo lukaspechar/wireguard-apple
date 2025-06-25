@@ -8,6 +8,8 @@ PLATFORM_NAME ?= macosx
 SDKROOT ?= $(shell xcrun --sdk $(PLATFORM_NAME) --show-sdk-path)
 CONFIGURATION_BUILD_DIR ?= $(CURDIR)/out
 CONFIGURATION_TEMP_DIR ?= $(CURDIR)/.tmp
+RUST_INCLUDE_DIR := $(CURDIR)/../../../wireguard-rust/target/include
+RUST_LIB_DIR := $(CURDIR)/../../../wireguard-rust/target/aarch64-apple-ios/release
 
 export PATH := $(PATH):/usr/local/bin:/opt/homebrew/bin
 export CC ?= clang
@@ -35,8 +37,8 @@ $(GOROOT)/.prepared:
 
 define libwg-go-a
 $(BUILDDIR)/libwg-go-$(1).a: export CGO_ENABLED := 1
-$(BUILDDIR)/libwg-go-$(1).a: export CGO_CFLAGS := $(CFLAGS_PREFIX) $(ARCH)
-$(BUILDDIR)/libwg-go-$(1).a: export CGO_LDFLAGS := $(CFLAGS_PREFIX) $(ARCH)
+$(BUILDDIR)/libwg-go-$(1).a: export CGO_CFLAGS := -isysroot $(SDKROOT) -arch $(1) -I$(RUST_INCLUDE_DIR)
+$(BUILDDIR)/libwg-go-$(1).a: export CGO_LDFLAGS := -isysroot $(SDKROOT) -arch $(1) -L$(RUST_LIB_DIR) -lwireguard_rust
 $(BUILDDIR)/libwg-go-$(1).a: export GOOS := $(GOOS_$(PLATFORM_NAME))
 $(BUILDDIR)/libwg-go-$(1).a: export GOARCH := $(GOARCH_$(1))
 $(BUILDDIR)/libwg-go-$(1).a: $(GOROOT)/.prepared go.mod
