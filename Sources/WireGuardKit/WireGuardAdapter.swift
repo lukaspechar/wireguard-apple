@@ -487,17 +487,14 @@ public class WireGuardAdapter {
         // logger
         wgRustInitLogger()
         
-        // set database
-        if let blokkDatabasePath = rustConfig.blokkDatabasePath {
-            wgRustSetBlokkDatabase(blokkDatabasePath)
-        }
-        
-        if let countryDatabasePath = rustConfig.countryDatabasePath {
-            wgRustSetCountryDatabase(countryDatabasePath)
-        }
-        
-        if let cacheLocation = rustConfig.cacheLocation {
-            wgRustSetCacheLocation(cacheLocation)
+        // user blacklist
+        if let userBlacklist = rustConfig.userBlacklist, !userBlacklist.isEmpty {
+            // Convert Swift Strings to C strings and keep them alive
+            let cStrings = userBlacklist.map { strdup($0)}
+            defer { cStrings.forEach{ free($0) } }
+            cStrings.withUnsafeBufferPointer { buffer in
+                wgRustSetUserBlacklist(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(userBlacklist.count))
+            }
         }
         
         // user whitelist
@@ -511,16 +508,6 @@ public class WireGuardAdapter {
             }
         }
         
-        // user blacklist
-        if let userBlacklist = rustConfig.userBlacklist, !userBlacklist.isEmpty {
-            // Convert Swift Strings to C strings and keep them alive
-            let cStrings = userBlacklist.map { strdup($0)}
-            defer { cStrings.forEach{ free($0) } }
-            cStrings.withUnsafeBufferPointer { buffer in
-                wgRustSetUserBlacklist(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(userBlacklist.count))
-            }
-        }
-        
         // enabled lists - filters
         if let enabledLists = rustConfig.enabledLists, !enabledLists.isEmpty {
             // Convert Swift Strings to C strings and keep them alive
@@ -531,6 +518,23 @@ public class WireGuardAdapter {
             }
         }
         
+        // set blokk database path
+        if let blokkDatabasePath = rustConfig.blokkDatabasePath {
+            wgRustSetBlokkDatabase(blokkDatabasePath)
+        }
+        
+        // country database path
+        if let countryDatabasePath = rustConfig.countryDatabasePath {
+            wgRustSetCountryDatabase(countryDatabasePath)
+        }
+        
+        // filter cache location
+        if let cacheLocation = rustConfig.cacheLocation {
+            wgRustSetCacheLocation(cacheLocation)
+        }
+        
+        
+        wgRustSetAggressiveMode(rustConfig.aggressiveMode)
     }
 }
 

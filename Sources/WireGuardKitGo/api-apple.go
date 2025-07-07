@@ -277,4 +277,9 @@ func wgRustSetEnabledLists(list **C.char, count C.int) {
 	rustblokk.SetUserBlackList(goEnabledLists)
 }
 
+//export wgRustSetAggressiveMode
+func wgRustSetAggressiveMode(enabled bool) {
+	rustblokk.SetAggressiveMode(enabled)
+}
+
 func main() {}
