@@ -27,6 +27,7 @@ import (
 	"golang.org/x/sys/unix"
 	"golang.zx2c4.com/wireguard/conn"
 	"golang.zx2c4.com/wireguard/device"
+	"golang.zx2c4.com/wireguard/rustblokk"
 	"golang.zx2c4.com/wireguard/tun"
 )
 
@@ -218,6 +219,62 @@ func wgVersion() *C.char {
 		}
 	}
 	return C.CString("unknown")
+}
+
+//export wgRustSetBlokkDatabase
+func wgRustSetBlokkDatabase(path *C.char) {
+	str := C.GoString(path)
+	rustblokk.SetBlokkDatabase(str)
+}
+
+//export wgRustSetCountryDatabase
+func wgRustSetCountryDatabase(path *C.char) {
+	str := C.GoString(path)
+	rustblokk.SetCountryDatabase(str)
+}
+
+//export wgRustSetCacheLocation
+func wgRustSetCacheLocation(path *C.char) {
+	str := C.GoString(path)
+	rustblokk.SetCacheLocation(str)
+}
+
+//export wgRustInitLogger
+func wgRustInitLogger() {
+	rustblokk.RustInitLogger()
+}
+
+//export wgRustSetUserWhitelist
+func wgRustSetUserWhitelist(list **C.char, count C.int) {
+	var goWhitelist []string
+	// Convert **C.char to a Go slice of *C.char
+	slice := (*[1 << 28]*C.char)(unsafe.Pointer(list))[:count:count]
+	for _, cstr := range slice {
+		goWhitelist = append(goWhitelist, C.GoString(cstr))
+	}
+	rustblokk.SetUserWhitelist(goWhitelist)
+}
+
+//export wgRustSetUserBlacklist
+func wgRustSetUserBlacklist(list **C.char, count C.int) {
+	var goBlacklist []string
+	// Convert **C.char to a Go slice of *C.char
+	slice := (*[1 << 28]*C.char)(unsafe.Pointer(list))[:count:count]
+	for _, cstr := range slice {
+		goBlacklist = append(goBlacklist, C.GoString(cstr))
+	}
+	rustblokk.SetUserBlackList(goBlacklist)
+}
+
+//export wgRustSetEnabledLists
+func wgRustSetEnabledLists(list **C.char, count C.int) {
+	var goEnabledLists []string
+	// Convert **C.char to a Go slice of *C.char
+	slice := (*[1 << 28]*C.char)(unsafe.Pointer(list))[:count:count]
+	for _, cstr := range slice {
+		goEnabledLists = append(goEnabledLists, C.GoString(cstr))
+	}
+	rustblokk.SetUserBlackList(goEnabledLists)
 }
 
 func main() {}

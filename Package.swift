@@ -60,7 +60,7 @@ let package = Package(
                 "Logging/Logger.swift", // Path relative to "Sources/Shared"
                 "Model/TunnelConfiguration+WgQuickConfig.swift",
                 "Model/NETunnelProviderProtocol+Extension.swift",
-                "Model/String+ArrayConversion.swift",
+                "Model/String+ArrayConversion.swift",                
                 "FileManager+Extension.swift",
                 "Keychain.swift",
                 "NotificationToken.swift"

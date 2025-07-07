@@ -122,17 +122,32 @@ public class WireGuardAdapter {
             }
         }
     }
-
+        
     // MARK: - Initialization
 
     /// Designated initializer.
     /// - Parameter packetTunnelProvider: an instance of `NEPacketTunnelProvider`. Internally stored
     ///   as a weak reference.
+    /// - Parameter rustBlokkConfig: rust init config for Blokk
     /// - Parameter logHandler: a log handler closure.
-    public init(with packetTunnelProvider: NEPacketTunnelProvider, logHandler: @escaping LogHandler) {
+    public init(packetTunnelProvider: NEPacketTunnelProvider, rustBlokkConfig: RustBlokkConfig, logHandler: @escaping LogHandler) {
+                
         self.packetTunnelProvider = packetTunnelProvider
         self.logHandler = logHandler
-
+        
+        // initialise Rust
+        initialiseBlokkRust(rustConfig: rustBlokkConfig)
+        setupLogHandler()
+    }
+    
+    /// Designated initializer.
+    /// - Parameter packetTunnelProvider: an instance of `NEPacketTunnelProvider`. Internally stored
+    ///   as a weak reference.
+    /// - Parameter logHandler: a log handler closure.
+    public init(packetTunnelProvider: NEPacketTunnelProvider, logHandler: @escaping LogHandler) {
+                        
+        self.packetTunnelProvider = packetTunnelProvider
+        self.logHandler = logHandler
         setupLogHandler()
     }
 
@@ -255,8 +270,7 @@ public class WireGuardAdapter {
 
             do {
                 let settingsGenerator = try self.makeSettingsGenerator(with: tunnelConfiguration)
-                try self.setNetworkSettings(settingsGenerator.generateNetworkSettings())
-
+                try self.setNetworkSettings(settingsGenerator.generateNetworkSettings())                
                 switch self.state {
                 case .started(let handle, _):
                     let (wgConfig, resolutionResults) = settingsGenerator.uapiConfiguration()
@@ -372,7 +386,7 @@ public class WireGuardAdapter {
         guard let tunnelFileDescriptor = self.tunnelFileDescriptor else {
             throw WireGuardAdapterError.cannotLocateTunnelFileDescriptor
         }
-
+        
         let handle = wgTurnOn(wgConfig, tunnelFileDescriptor)
         if handle < 0 {
             throw WireGuardAdapterError.startWireGuardBackend(handle)
@@ -463,6 +477,60 @@ public class WireGuardAdapter {
         #else
         #error("Unsupported")
         #endif
+    }
+    
+    // MARK: - Blokk methods
+    private func initialiseBlokkRust(rustConfig: RustBlokkConfig) {
+                
+        // call rust init calls
+        
+        // logger
+        wgRustInitLogger()
+        
+        // set database
+        if let blokkDatabasePath = rustConfig.blokkDatabasePath {
+            wgRustSetBlokkDatabase(blokkDatabasePath)
+        }
+        
+        if let countryDatabasePath = rustConfig.countryDatabasePath {
+            wgRustSetCountryDatabase(countryDatabasePath)
+        }
+        
+        if let cacheLocation = rustConfig.cacheLocation {
+            wgRustSetCacheLocation(cacheLocation)
+        }
+        
+        // user whitelist
+        if let userWhitelist = rustConfig.userWhitelist, !userWhitelist.isEmpty {
+            // Convert Swift Strings to C strings and keep them alive
+            let cStrings = userWhitelist.map { strdup($0) }
+            defer { cStrings.forEach { free($0) } }
+            
+            cStrings.withUnsafeBufferPointer { buffer in
+                wgRustSetUserWhitelist(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(userWhitelist.count))
+            }
+        }
+        
+        // user blacklist
+        if let userBlacklist = rustConfig.userBlacklist, !userBlacklist.isEmpty {
+            // Convert Swift Strings to C strings and keep them alive
+            let cStrings = userBlacklist.map { strdup($0)}
+            defer { cStrings.forEach{ free($0) } }
+            cStrings.withUnsafeBufferPointer { buffer in
+                wgRustSetUserBlacklist(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(userBlacklist.count))
+            }
+        }
+        
+        // enabled lists - filters
+        if let enabledLists = rustConfig.enabledLists, !enabledLists.isEmpty {
+            // Convert Swift Strings to C strings and keep them alive
+            let cStrings = enabledLists.map { strdup($0)}
+            defer { cStrings.forEach{ free($0) } }
+            cStrings.withUnsafeBufferPointer { buffer in
+                wgRustSetEnabledLists(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(enabledLists.count))
+            }
+        }
+        
     }
 }
 
