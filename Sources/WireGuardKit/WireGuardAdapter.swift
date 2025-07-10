@@ -519,21 +519,16 @@ public class WireGuardAdapter {
         }
         
         // set blokk database path
-        if let blokkDatabasePath = rustConfig.blokkDatabasePath {
-            wgRustSetBlokkDatabase(blokkDatabasePath)
-        }
+        wgRustSetBlokkDatabase(rustConfig.blokkDatabasePath)
+        
         
         // country database path
-        if let countryDatabasePath = rustConfig.countryDatabasePath {
-            wgRustSetCountryDatabase(countryDatabasePath)
-        }
+        wgRustSetCountryDatabase(rustConfig.countryDatabasePath)
         
         // filter cache location
-        if let cacheLocation = rustConfig.cacheLocation {
-            wgRustSetCacheLocation(cacheLocation)
-        }
-        
-        
+        wgRustSetCacheLocation(rustConfig.cacheLocation)
+            
+        // set agressive mode state
         wgRustSetAggressiveMode(rustConfig.aggressiveMode)
     }
 }
