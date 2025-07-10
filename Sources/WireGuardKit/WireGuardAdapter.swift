@@ -520,16 +520,16 @@ public class WireGuardAdapter {
         
         // set blokk database path
         wgRustSetBlokkDatabase(rustConfig.blokkDatabasePath)
-        
-        
+                
         // country database path
         wgRustSetCountryDatabase(rustConfig.countryDatabasePath)
         
-        // filter cache location
-        wgRustSetCacheLocation(rustConfig.cacheLocation)
-            
         // set agressive mode state
         wgRustSetAggressiveMode(rustConfig.aggressiveMode)
+        
+        // filter cache location
+        wgRustSetCacheLocation(rustConfig.cacheLocation)
+                    
     }
 }
 
