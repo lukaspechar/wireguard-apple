@@ -274,7 +274,7 @@ func wgRustSetEnabledLists(list **C.char, count C.int) {
 	for _, cstr := range slice {
 		goEnabledLists = append(goEnabledLists, C.GoString(cstr))
 	}
-	rustblokk.SetUserBlackList(goEnabledLists)
+	rustblokk.SetEnabledLists(goEnabledLists)
 }
 
 //export wgRustSetAggressiveMode
