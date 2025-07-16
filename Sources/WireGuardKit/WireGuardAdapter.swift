@@ -479,7 +479,70 @@ public class WireGuardAdapter {
         #endif
     }
     
-    // MARK: - Blokk methods
+}
+
+/// A enum describing WireGuard log levels defined in `api-apple.go`.
+public enum WireGuardLogLevel: Int32 {
+    case verbose = 0
+    case error = 1
+}
+
+private extension Network.NWPath.Status {
+    /// Returns `true` if the path is potentially satisfiable.
+    var isSatisfiable: Bool {
+        switch self {
+        case .requiresConnection, .satisfied:
+            return true
+        case .unsatisfied:
+            return false
+        @unknown default:
+            return true
+        }
+    }
+}
+
+// MARK: - WireGuardAdapter + Blokk Rust Filters
+extension WireGuardAdapter {
+    
+    // MARK: - Public
+    public func updateUserBlacklist(_ userBlacklist: [String]?) {
+        if let userBlacklist = userBlacklist {
+            let cStrings = userBlacklist.map { strdup($0)}
+            defer { cStrings.forEach{ free($0) } }
+            cStrings.withUnsafeBufferPointer { buffer in
+                wgRustSetUserBlacklist(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(userBlacklist.count))
+            }
+        }
+    }
+    
+    public func updateUserWhitelist(_ userWhitelist: [String]?) {
+        if let userWhitelist = userWhitelist {
+            let cStrings = userWhitelist.map { strdup($0)}
+            defer { cStrings.forEach{ free($0) } }
+            cStrings.withUnsafeBufferPointer { buffer in
+                wgRustSetUserWhitelist(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(userWhitelist.count))
+            }
+        }
+    }
+    
+    public func updateEnabledLists(_ enabledLists: [String]?) {
+        // Convert Swift Strings to C strings and keep them alive
+        if let enabledLists = enabledLists {
+            // Convert Swift Strings to C strings and keep them alive
+            let cStrings = enabledLists.map { strdup($0)}
+            defer { cStrings.forEach{ free($0) } }
+            cStrings.withUnsafeBufferPointer { buffer in
+                wgRustSetEnabledLists(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(enabledLists.count))
+            }
+        }
+    }
+    
+    public func updateAggressiveMode(_ isAggressive:Bool) {
+        // set agressive mode state
+        wgRustSetAggressiveMode(isAggressive)
+    }
+    
+    // MARK: - Private
     private func initialiseBlokkRust(rustConfig: RustBlokkConfig) {
                 
         // call rust init calls
@@ -530,25 +593,5 @@ public class WireGuardAdapter {
         // filter cache location
         wgRustSetCacheLocation(rustConfig.cacheLocation)
                     
-    }
-}
-
-/// A enum describing WireGuard log levels defined in `api-apple.go`.
-public enum WireGuardLogLevel: Int32 {
-    case verbose = 0
-    case error = 1
-}
-
-private extension Network.NWPath.Status {
-    /// Returns `true` if the path is potentially satisfiable.
-    var isSatisfiable: Bool {
-        switch self {
-        case .requiresConnection, .satisfied:
-            return true
-        case .unsatisfied:
-            return false
-        @unknown default:
-            return true
-        }
     }
 }
