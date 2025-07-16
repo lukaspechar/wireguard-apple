@@ -282,4 +282,9 @@ func wgRustSetAggressiveMode(enabled bool) {
 	rustblokk.SetAggressiveMode(enabled)
 }
 
+//export wgReloadBlockedCountries
+func wgReloadBlockedCountries() {
+	rustblokk.ReloadBlockedCountries()
+}
+
 func main() {}

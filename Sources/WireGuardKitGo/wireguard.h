@@ -29,4 +29,5 @@ extern void wgRustSetUserWhitelist(char *const list[], int count);
 extern void wgRustSetUserBlacklist(char *const list[], int count);
 extern void wgRustSetEnabledLists(char *const list[], int count);
 extern void wgRustSetAggressiveMode(bool enabled);
+extern void wgReloadBlockedCountries();
 #endif
