@@ -282,9 +282,24 @@ func wgRustSetAggressiveMode(enabled bool) {
 	rustblokk.SetAggressiveMode(enabled)
 }
 
-//export wgReloadBlockedCountries
-func wgReloadBlockedCountries() {
+//export wgRustReloadBlockedCountries
+func wgRustReloadBlockedCountries() {
 	rustblokk.ReloadBlockedCountries()
+}
+
+//export wgRustSetIPBlocked
+func wgRustSetIPBlocked(blocked bool) {
+	rustblokk.SetIPBlocked(blocked)
+}
+
+//export wgRustSetUTF8Blocked
+func wgRustSetUTF8Blocked(blocked bool) {
+	rustblokk.SetUTF8Blocked(blocked)
+}
+
+//export wgRustIsPaused
+func wgRustIsPaused() bool {
+	return rustblokk.IsPaused()
 }
 
 func main() {}

@@ -542,6 +542,22 @@ extension WireGuardAdapter {
         wgRustSetAggressiveMode(isAggressive)
     }
     
+    public func reloadBlockedCountries() {
+        wgRustReloadBlockedCountries()
+    }
+    
+    public func updateIPBlocked(blocked: Bool){
+        wgRustSetIPBlocked(blocked)
+    }
+    
+    public func updateUTF8Blocked(blocked: Bool){
+        wgRustSetUTF8Blocked(blocked)
+    }
+    
+    public func getPausedState() -> Bool {
+        return wgRustIsPaused()
+    }
+    
     // MARK: - Private
     private func initialiseBlokkRust(rustConfig: RustBlokkConfig) {
                 
