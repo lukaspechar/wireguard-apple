@@ -9,7 +9,7 @@ SDKROOT ?= $(shell xcrun --sdk $(PLATFORM_NAME) --show-sdk-path)
 CONFIGURATION_BUILD_DIR ?= $(CURDIR)/out
 CONFIGURATION_TEMP_DIR ?= $(CURDIR)/.tmp
 RUST_INCLUDE_DIR := $(CURDIR)/../../../../Revoke/RevokeVPNApp/rustlib/vpnpacketfilter_ios/target/include
-RUST_LIB_DIR := $(CURDIR)/../../../../Revoke/RevokeVPNApp/rustlib/vpnpacketfilter_ios/target/aarch64-apple-ios/release
+RUST_LIB_DIR := $(CURDIR)/../../../../Revoke/RevokeVPNApp/rustlib/vpnpacketfilter_ios/target/lib
 
 export PATH := $(PATH):/usr/local/bin:/opt/homebrew/bin
 export CC ?= clang

@@ -1,33 +1,45 @@
 # SPDX-License-Identifier: MIT
-#
-# Copyright (C) 2018-2019 Jason A. Donenfeld <Jason@zx2c4.com>. All Rights Reserved.
 
-# These are generally passed to us by xcode, but we set working defaults for standalone compilation too.
-ARCHS ?= x86_64 arm64
-PLATFORM_NAME ?= macosx
+# Copyright (C) 2018-2019 Jason A. Donenfeld . All Rights Reserved.
+
+# Build only for iOS Simulator (Apple Silicon, arm64), no lipo.
+
+ARCHS ?= arm64
+
+PLATFORM_NAME ?= iphonesimulator
+
 SDKROOT ?= $(shell xcrun --sdk $(PLATFORM_NAME) --show-sdk-path)
+
 CONFIGURATION_BUILD_DIR ?= $(CURDIR)/out
+
 CONFIGURATION_TEMP_DIR ?= $(CURDIR)/.tmp
+
 RUST_INCLUDE_DIR := $(CURDIR)/../../../../Revoke/RevokeVPNApp/rustlib/vpnpacketfilter_ios/target/include
+
 RUST_LIB_DIR := $(CURDIR)/../../../../Revoke/RevokeVPNApp/rustlib/vpnpacketfilter_ios/target/lib
 
 export PATH := $(PATH):/usr/local/bin:/opt/homebrew/bin
+
 export CC ?= clang
-LIPO ?= lipo
+
 DESTDIR ?= $(CONFIGURATION_BUILD_DIR)
+
 BUILDDIR ?= $(CONFIGURATION_TEMP_DIR)/wireguard-go-bridge
 
 CFLAGS_PREFIX := $(if $(DEPLOYMENT_TARGET_CLANG_FLAG_NAME),-$(DEPLOYMENT_TARGET_CLANG_FLAG_NAME)=$($(DEPLOYMENT_TARGET_CLANG_ENV_NAME)),) -isysroot $(SDKROOT) -arch
+
 GOARCH_arm64 := arm64
-GOARCH_x86_64 := amd64
-GOOS_macosx := darwin
-GOOS_iphoneos := ios
+
+GOOS_iphonesimulator := ios
 
 build: $(DESTDIR)/libwg-go.a
+
 version-header: $(DESTDIR)/wireguard-go-version.h
 
 REAL_GOROOT := $(shell go env GOROOT 2>/dev/null)
+
 export GOROOT := $(BUILDDIR)/goroot
+
 $(GOROOT)/.prepared:
 	[ -n "$(REAL_GOROOT)" ]
 	mkdir -p "$(GOROOT)"
@@ -35,24 +47,22 @@ $(GOROOT)/.prepared:
 	cat goruntime-*.diff | patch -p1 -f -N -r- -d "$(GOROOT)"
 	touch "$@"
 
-define libwg-go-a
-$(BUILDDIR)/libwg-go-$(1).a: export CGO_ENABLED := 1
-$(BUILDDIR)/libwg-go-$(1).a: export CGO_CFLAGS := -isysroot $(SDKROOT) -arch $(1) -I$(RUST_INCLUDE_DIR)
-$(BUILDDIR)/libwg-go-$(1).a: export CGO_LDFLAGS := -isysroot $(SDKROOT) -arch $(1) -L$(RUST_LIB_DIR) -lvpnpacketfilter_ios
-$(BUILDDIR)/libwg-go-$(1).a: export GOOS := $(GOOS_$(PLATFORM_NAME))
-$(BUILDDIR)/libwg-go-$(1).a: export GOARCH := $(GOARCH_$(1))
-$(BUILDDIR)/libwg-go-$(1).a: $(GOROOT)/.prepared go.mod
-	go build -ldflags=-w -trimpath -v -o "$(BUILDDIR)/libwg-go-$(1).a" -buildmode c-archive
-	rm -f "$(BUILDDIR)/libwg-go-$(1).h"
-endef
-$(foreach ARCH,$(ARCHS),$(eval $(call libwg-go-a,$(ARCH))))
+libwg-go-a-arm64: export CGO_ENABLED := 1
+libwg-go-a-arm64: export CGO_CFLAGS := -isysroot $(SDKROOT) -arch arm64 -I$(RUST_INCLUDE_DIR)
+libwg-go-a-arm64: export CGO_LDFLAGS := -isysroot $(SDKROOT) -arch arm64 -L$(RUST_LIB_DIR) -lvpnpacketfilter_ios
+libwg-go-a-arm64: export GOOS := ios
+libwg-go-a-arm64: export GOARCH := arm64
+libwg-go-a-arm64: $(GOROOT)/.prepared go.mod
+	go build -ldflags=-w -trimpath -v -o "$(BUILDDIR)/libwg-go-arm64.a" -buildmode c-archive
+	rm -f "$(BUILDDIR)/libwg-go-arm64.h"
 
 $(DESTDIR)/wireguard-go-version.h: go.mod $(GOROOT)/.prepared
-	 sed -E -n 's/.*golang\.zx2c4\.com\/wireguard +v[0-9.]+-[0-9]+-([0-9a-f]{8})[0-9a-f]{4}.*/#define WIREGUARD_GO_VERSION "\1"/p' "$<" > "$@"
+	sed -E -n 's/.*golang\.zx2c4\.com\/wireguard +v[0-9.]+-[0-9]+-([0-9a-f]{8})[0-9a-f]{4}.*/#define WIREGUARD_GO_VERSION "\1"/p' "$<" > "$@"
 
-$(DESTDIR)/libwg-go.a: $(foreach ARCH,$(ARCHS),$(BUILDDIR)/libwg-go-$(ARCH).a)
+# Note: No lipo here; just copy the arm64 build output as the final static lib
+$(DESTDIR)/libwg-go.a: libwg-go-a-arm64
 	@mkdir -vp "$(DESTDIR)"
-	$(LIPO) -create -output "$@" $^
+	cp "$(BUILDDIR)/libwg-go-arm64.a" "$(DESTDIR)/libwg-go.a"
 
 clean:
 	rm -rf "$(BUILDDIR)" "$(DESTDIR)/libwg-go.a" "$(DESTDIR)/wireguard-go-version.h"
