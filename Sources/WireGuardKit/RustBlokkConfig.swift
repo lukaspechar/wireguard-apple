@@ -15,11 +15,16 @@ public class RustBlokkConfig: NSObject {
     @objc public var enabledLists: [String]? = []
     let aggressiveMode: Bool
     
-    public init(blokkDatabasePath: String, countryDatabasePath: String, cacheLocation: String, aggressiveMode: Bool) {
+    let blockUTF8: Bool
+    let blockIPs: Bool
+    
+    public init(blokkDatabasePath: String, countryDatabasePath: String, cacheLocation: String, aggressiveMode: Bool, blockUTF8: Bool, blockIPs: Bool) {
         self.blokkDatabasePath = blokkDatabasePath
         self.countryDatabasePath = countryDatabasePath
         self.cacheLocation = cacheLocation
         self.aggressiveMode = aggressiveMode
+        self.blockIPs = blockIPs
+        self.blockUTF8 = blockUTF8
     }
             
 }

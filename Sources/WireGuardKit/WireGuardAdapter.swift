@@ -603,6 +603,12 @@ extension WireGuardAdapter {
         // country database path
         wgRustSetCountryDatabase(rustConfig.countryDatabasePath)
         
+        // ip blocking enabled
+        wgRustSetIPBlocked(rustConfig.blockIPs)
+        
+        // utf8 blocking enabled
+        wgRustSetUTF8Blocked(rustConfig.blockUTF8)
+        
         // set agressive mode state
         wgRustSetAggressiveMode(rustConfig.aggressiveMode)
         
