@@ -302,4 +302,16 @@ func wgRustIsPaused() bool {
 	return rustblokk.IsPaused()
 }
 
+//export wgRustSetSilentDomains
+func wgRustSetSilentDomains(list **C.char, count C.int) {
+	var goSilentDomains []string
+	// Convert **C.char to a Go slice of *C.char
+	slice := (*[1 << 28]*C.char)(unsafe.Pointer(list))[:count:count]
+	for _, cstr := range slice {
+		goSilentDomains = append(goSilentDomains, C.GoString(cstr))
+	}
+	rustblokk.SetSilentDomains(goSilentDomains)
+
+}
+
 func main() {}

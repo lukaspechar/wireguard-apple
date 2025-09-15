@@ -28,6 +28,7 @@ extern const char *wgRustSetCacheLocation(const char *path);
 extern void wgRustSetUserWhitelist(char *const list[], int count);
 extern void wgRustSetUserBlacklist(char *const list[], int count);
 extern void wgRustSetEnabledLists(char *const list[], int count);
+extern void wgRustSetSilentDomains(char *const list[], int count);
 extern void wgRustSetAggressiveMode(bool enabled);
 extern void wgRustSetIPBlocked(bool blocked);
 extern void wgRustSetUTF8Blocked(bool blocked);

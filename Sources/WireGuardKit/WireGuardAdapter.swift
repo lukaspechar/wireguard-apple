@@ -597,6 +597,17 @@ extension WireGuardAdapter {
             }
         }
         
+        // silent domains
+        if let silentDomains = rustConfig.silentDomains, !silentDomains.isEmpty {
+            // Convert Swift Strings to C strings and keep them alive
+            let cStrings = silentDomains.map { strdup($0) }
+            defer { cStrings.forEach { free($0) } }
+            
+            cStrings.withUnsafeBufferPointer { buffer in
+                wgRustSetSilentDomains(UnsafeMutablePointer(mutating: buffer.baseAddress), Int32(silentDomains.count))
+            }
+        }
+        
         // set blokk database path
         wgRustSetBlokkDatabase(rustConfig.blokkDatabasePath)
                 

@@ -13,6 +13,7 @@ public class RustBlokkConfig: NSObject {
     @objc public var userBlacklist: [String]? = []
     @objc public var userWhitelist: [String]? = []
     @objc public var enabledLists: [String]? = []
+    @objc public var silentDomains: [String]? = []
     let aggressiveMode: Bool
     
     let blockUTF8: Bool
